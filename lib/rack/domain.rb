@@ -16,7 +16,6 @@ class Rack::Domain
   # @option opts [#call, nil] :run The Rack app to run if the domain matches the
   #   filter. If you don't want to pass a ready application, you can pass a
   #   block with `Rack::Builder` syntax which will create a Rack app on-the-fly.
-  #
   # @raise [ArgumentError] if both a building block and an app to run were
   #   passed to this function.
   def initialize(next_app, filter, opts = {}, &block)
