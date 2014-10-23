@@ -41,7 +41,7 @@ existing Rack app through the `:run` option, or you can pass a block in which
 you can use the classic `use|run|map...` syntax. This works because the block is
 directly passed to a new instance of `Rack::Builder`.
 
-### Examples
+#### Examples
 
 Using a regexp:
 
