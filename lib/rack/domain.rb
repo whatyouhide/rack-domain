@@ -4,6 +4,20 @@ require 'rack/domain/version'
 
 # This Rack middleware allows to intercept requests and route them to different
 # apps based on the domain (full, with subdomains and the TLD).
+#
+# @example Using a regexp
+#   # Match the 'lobster' subdomain.
+#   use Rack::Domain, /^lobster\./, run: Rack::Lobster.new
+# @example Using a string
+#   # Match only if the current domain is github.com:
+#   use Rack::Domain, 'github.com', run: MyGitHubClone
+# @example Using an array of strings and regexps
+#   use Rack::Domain, ['lobst.er', /^lobster\./], run: Rack::Lobster.new
+# @example Using an on-the-fly app build with a `Rack::Builder` block:
+#   use Rack::Domain, /^api/ do
+#     use Rack::Logger
+#     run MyApi
+#   end
 class Rack::Domain
   # Create a new instance of this middleware.
   # **Note** that this method is the method called by `Rack::Builder#use`.
@@ -55,7 +69,7 @@ class Rack::Domain
 
   # Return `true` if the domain of the current request matches the given
   # `@filter`, `false` otherwise.
-  # @raises [ArgumentError] if the filter or array of filters aren't regexps or
+  # @raise [ArgumentError] if the filter or array of filters aren't regexps or
   #   strings.
   # @return [Boolean]
   def domain_matches?
