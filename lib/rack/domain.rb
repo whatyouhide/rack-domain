@@ -1,3 +1,5 @@
+# enconding: UTF-8
+
 require 'rack/domain/version'
 
 # This Rack middleware allows to intercept requests and route them to different

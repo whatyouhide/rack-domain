@@ -1,3 +1,5 @@
+# enconding: UTF-8
+
 require_relative 'test_helper'
 
 NOT_FOUNDER = lambda { |env| [404, {}, ['Error']] }

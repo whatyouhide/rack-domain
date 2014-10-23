@@ -1,3 +1,5 @@
+# enconding: UTF-8
+
 # Extensions to the `Rack` module.
 module Rack
   class Domain

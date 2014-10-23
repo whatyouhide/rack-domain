@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 require 'rack/domain'
 
 # This class is monkeypatched with the `#domain` method.

@@ -1,4 +1,10 @@
+# enconding: UTF-8
+
 ENV['RACK_ENV'] = 'test'
+
+# Coveralls coverage metrics.
+require 'coveralls'
+Coveralls.wear!
 
 require 'minitest/autorun'
 require 'minitest/pride'
