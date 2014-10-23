@@ -12,19 +12,21 @@ class Rack::Domain
   #   If `filter` is a `String`, it will be matched *at the beginning* of the
   #   domain name; this is done so that it's easy to match subdomains and
   #   domains without TLDs.
-  # @param [#call, nil] app_to_run The Rack app to run if the domain matches the
+  # @param [Hash] opts An hash of options.
+  # @option opts [#call, nil] :run The Rack app to run if the domain matches the
   #   filter. If you don't want to pass a ready application, you can pass a
   #   block with `Rack::Builder` syntax which will create a Rack app on-the-fly.
+  #
   # @raise [ArgumentError] if both a building block and an app to run were
   #   passed to this function.
-  def initialize(next_app, filter, app_to_run = nil, &block)
-    if app_to_run && block_given?
+  def initialize(next_app, filter, opts = {}, &block)
+    if opts[:run] && block_given?
       fail ArgumentError, 'Pass either an app to run or a block, not both'
     end
 
     @next_app = next_app
     @filter = filter
-    @app_to_run = app_to_run
+    @app_to_run = opts[:run]
     @dsl_block = block
   end
 

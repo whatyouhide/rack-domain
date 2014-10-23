@@ -10,7 +10,7 @@ class DomainTest < Minitest::Test
   def test_with_a_string
     %w(api api.example api.example.com).each do |str|
       set_app_to do
-        use Rack::Domain, str, Rack::Lobster.new
+        use Rack::Domain, str, run: Rack::Lobster.new
         run NOT_FOUNDER
       end
 
@@ -21,7 +21,7 @@ class DomainTest < Minitest::Test
   def test_with_regexps
     [/^api\./, /.+/, /example/, /\.com$/].each do |regexp|
       set_app_to do
-        use Rack::Domain, regexp, Rack::Lobster.new
+        use Rack::Domain, regexp, run: Rack::Lobster.new
         run NOT_FOUNDER
       end
 
@@ -47,13 +47,13 @@ class DomainTest < Minitest::Test
     require 'rack/domain/dsl'
 
     set_app_to do
-      domain 'api', Rack::Lobster.new
+      domain 'api', run: Rack::Lobster.new
       run NOT_FOUNDER
     end
     assert_dispatches_to_the_right_app
 
     set_app_to do
-      domain /^api\./, Rack::Lobster.new
+      domain /^api\./, run: Rack::Lobster.new
       run NOT_FOUNDER
     end
     assert_dispatches_to_the_right_app
