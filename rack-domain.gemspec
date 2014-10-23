@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/whatyouhide/rack-domain'
   spec.license       = 'MIT'
   spec.summary       = <<-SUMMARY
-    Rack middleware for dispatching Rack apps based on the domain'
+    Rack middleware for dispatching Rack apps based on the domain.
   SUMMARY
   spec.description   = <<-DESCRIPTION
     This Rack middleware allows you to run specific apps when the request

@@ -10,14 +10,18 @@ class Rack::Domain
   #
   # @param [#call] next_app The next app on the stack, filled automatically by
   #   Rack when building the middlware chain.
-  # @param [String, Regexp] filter The filter used to, well, filter the domain.
-  #   If `filter` is a `String`, it will be matched *at the beginning* of the
-  #   domain name; this is done so that it's easy to match subdomains and
-  #   domains without TLDs.
+  #
+  # @param [String, Regexp, Array<String, Regexp>] filter The filter used to,
+  #   well, filter the domain. If `filter` is a `String`, it will be matched as the
+  #   entire domain; if it's a regexp, it will be matched as a regexp. If it's
+  #   an array of strings and regexps, it will match if any of the elements of
+  #   the array matches the domain as specified above.
+  #
   # @param [Hash] opts An hash of options.
   # @option opts [#call, nil] :run The Rack app to run if the domain matches the
   #   filter. If you don't want to pass a ready application, you can pass a
   #   block with `Rack::Builder` syntax which will create a Rack app on-the-fly.
+  #
   # @raise [ArgumentError] if both a building block and an app to run were
   #   passed to this function.
   def initialize(next_app, filter, opts = {}, &block)
@@ -51,15 +55,23 @@ class Rack::Domain
 
   # Return `true` if the domain of the current request matches the given
   # `@filter`, `false` otherwise.
+  # @raises [ArgumentError] if the filter or array of filters aren't regexps or
+  #   strings.
   # @return [Boolean]
   def domain_matches?
-    case @filter
-    when Regexp
-      @filter =~ @domain
-    when String
-      @domain.start_with?(@filter)
-    else
-      fail 'The filter must be a Regexp or a String'
+    # Force the filter to be an array.
+    @filter = [@filter] unless @filter.is_a?(Array)
+
+    # Check if any of the elements of the `@filter` array matches the domain.
+    # The matching test is done based on the element's type.
+    @filter.any? do |flt|
+      if flt.is_a?(Regexp)
+        flt =~ @domain
+      elsif flt.is_a?(String)
+        flt == @domain
+      else
+        fail ArgumentError, 'The filters must be strings or regexps'
+      end
     end
   end
 end

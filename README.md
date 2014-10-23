@@ -5,6 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/whatyouhide/rack-domain/badge.png)](https://coveralls.io/r/whatyouhide/rack-domain)
 [![Inline docs](http://inch-ci.org/github/whatyouhide/rack-domain.svg?branch=master)](http://inch-ci.org/github/whatyouhide/rack-domain)
 
+
 ## Installation
 
 Add this line to your application's Gemfile:

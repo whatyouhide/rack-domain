@@ -2,11 +2,8 @@
 
 require_relative 'test_helper'
 
+LOBSTER = lambda { |env| [200, {}, ['Lobstericious']] }
 NOT_FOUNDER = lambda { |env| [404, {}, ['Error']] }
-LOBSTER = Rack::Builder.new do
-  map('/lobster') { run Rack::Lobster.new }
-  map('/') { run NOT_FOUNDER }
-end
 
 class DomainTest < Minitest::Test
   include Rack::Test::Methods
@@ -14,10 +11,28 @@ class DomainTest < Minitest::Test
   BASE_URL = 'http://example.com'
   BASE_URL_WITH_SUBDOMAIN = 'http://api.example.com'
 
-  def test_with_a_string
-    %w(api api.example api.example.com).each do |str|
+  def test_with_a_single_specific_domain
+    set_app_to do
+      use Rack::Domain, 'api.example.com', run: LOBSTER
+      run NOT_FOUNDER
+    end
+
+    assert_dispatches_to_the_right_app
+  end
+
+  def test_with_an_array_of_domains
+    set_app_to do
+      use Rack::Domain, %w(api.a.b api.example.com), run: LOBSTER
+      run NOT_FOUNDER
+    end
+
+    assert_dispatches_to_the_right_app
+  end
+
+  def test_with_single_regexps
+    [/^api\./, /.+/, /example/, /\.com$/].each do |regexp|
       set_app_to do
-        use Rack::Domain, str, run: Rack::Lobster.new
+        use Rack::Domain, regexp, run: LOBSTER
         run NOT_FOUNDER
       end
 
@@ -25,24 +40,26 @@ class DomainTest < Minitest::Test
     end
   end
 
-  def test_with_regexps
-    [/^api\./, /.+/, /example/, /\.com$/].each do |regexp|
-      set_app_to do
-        use Rack::Domain, regexp, run: Rack::Lobster.new
-        run NOT_FOUNDER
-      end
+  def test_with_an_array_of_regexps
+    set_app_to do
+      use Rack::Domain, [/api/, /test/], run: LOBSTER
+      run NOT_FOUNDER
+    end
 
-      assert_dispatches_to_the_right_app
+    assert_dispatches_to_the_right_app
+  end
+
+  def test_matching_with_a_mixed_array
+    set_app_to do
+      use Rack::Domain, [/api/, 'api.example.com'], run: LOBSTER
+      run NOT_FOUNDER
     end
   end
 
   def test_with_a_block
-    ['api', 'api.exam', /example/, /\.com$/].each do |filter|
+    ['api.example.com', /example/, /\.com$/].each do |filter|
       set_app_to do
-        use Rack::Domain, filter do
-          run Rack::Lobster.new
-        end
-
+        use(Rack::Domain, filter) { run LOBSTER }
         run NOT_FOUNDER
       end
 
@@ -50,27 +67,23 @@ class DomainTest < Minitest::Test
     end
   end
 
-  def test_rack_builder_dsl_extension
-    require 'rack/domain/dsl'
-
-    set_app_to do
-      domain 'api', run: Rack::Lobster.new
-      run NOT_FOUNDER
-    end
-    assert_dispatches_to_the_right_app
-
-    set_app_to do
-      domain /^api\./, run: Rack::Lobster.new
-      run NOT_FOUNDER
-    end
-    assert_dispatches_to_the_right_app
-  end
-
   def test_argument_errors
+    # Both a block and a :run option.
     assert_app_raises ArgumentError do
-      lob = Rack::Lobster.new
-      use(Rack::Domain, 'api', { run: Rack::Lobster.new }) { lob }
-      run lob
+      use(Rack::Domain, 'api', run: LOBSTER) { lob }
+      run LOBSTER
+    end
+
+    # No filter specified.
+    assert_app_raises ArgumentError do
+      use(Rack::Domain, {}) { run LOBSTER }
+      run LOBSTER
+    end
+
+    # No arguments passed.
+    assert_app_raises ArgumentError do
+      use(Rack::Domain)
+      run LOBSTER
     end
   end
 
